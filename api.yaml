@@ -1,0 +1,82 @@
+openapi: 3.0.0
+info:
+  title: PokeRaid User API
+  version: 1.0.0
+  description: API for user registration and login
+paths:
+  /users/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserDto'
+      responses:
+        '200':
+          description: Successfully registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: number
+                  username:
+                    type: string
+  /users/login:
+    post:
+      summary: Log in a user and get session ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginUserDto'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponseDto'
+        '401':
+          description: Invalid credentials
+components:
+  schemas:
+    CreateUserDto:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: user123
+        password:
+          type: string
+          format: password
+          minLength: 4
+          example: pass1234
+    LoginUserDto:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: user123
+        password:
+          type: string
+          example: pass1234
+    LoginResponseDto:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          example: abcdefgh-1234-5678-ijkl-9876543210ab
+        username:
+          type: string
+          example: user123
