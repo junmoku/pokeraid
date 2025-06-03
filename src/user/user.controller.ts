@@ -4,12 +4,15 @@ import {
   Body,
   Req,
   UnauthorizedException,
+  Get,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, LoginResponseDto, LoginUserDto } from './user.dto';
 import { RedisService } from 'src/reedis/redis.service';
 import { Request } from 'express';
 import { v4 as uuidv4, v4 } from 'uuid';
+import { HttpSessionGuard } from 'src/guard/http.session.guard';
 
 @Controller('users')
 export class UserController {
@@ -50,5 +53,11 @@ export class UserController {
       sessionId,
       username: user.username,
     };
+  }
+
+  @Get('poketmons')
+  @UseGuards(HttpSessionGuard)
+  async getMyPokemon(@Req() req: Request) {
+    return this.userService.getMyPokemons(req['user'].id);
   }
 }

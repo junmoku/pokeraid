@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user/user.entity';
 import { UserModule } from './user/user.module';
 import { RedisModule } from './reedis/redis.module';
+import { ShopModule } from './shop/shop.module';
 
 @Module({
   imports: [
@@ -13,11 +14,12 @@ import { RedisModule } from './reedis/redis.module';
       username: 'user',
       password: 'secret123',
       database: 'pokeraid',
-      entities: [User],
+      entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
     }),
     RedisModule.forRootAsync(),
     UserModule,
+    ShopModule,
   ],
 })
 export class AppModule {}
