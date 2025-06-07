@@ -13,13 +13,13 @@ CREATE TABLE `shop` (
 
 
 INSERT INTO shop (type, target_id, price, stock) VALUES
-('POKEMON', 1, 100, 10),
-('POKEMON', 2, 120, 15),
-('POKEMON', 3, 90, 8),
-('POKEMON', 4, 110, 12),
-('POKEMON', 5, 130, 5),
-('POKEMON', 6, 95, 9),
-('POKEMON', 7, 105, 11),
-('POKEMON', 8, 115, 7),
-('POKEMON', 9, 98, 20),
-('POKEMON', 10, 200, 3);
+('POKEMON', 1, 12, 10),
+('POKEMON', 2, 18, 15),
+('POKEMON', 3, 15, 8),
+('POKEMON', 4, 17, 12),
+('POKEMON', 5, 20, 5),
+('POKEMON', 6, 11, 9),
+('POKEMON', 7, 16, 11),
+('POKEMON', 8, 19, 7),
+('POKEMON', 9, 14, 20),
+('POKEMON', 10, 13, 3);

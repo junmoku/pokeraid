@@ -1,25 +1,19 @@
 import {
-  Controller,
-  Post,
   Body,
-  Req,
-  UnauthorizedException,
+  Controller,
   Get,
-  UseGuards,
+  Post,
+  Req,
+  UseGuards
 } from '@nestjs/common';
-import { UserService } from './user.service';
-import { CreateUserDto, LoginResponseDto, LoginUserDto } from './user.dto';
-import { RedisService } from 'src/reedis/redis.service';
-import { Request } from 'express';
-import { v4 as uuidv4, v4 } from 'uuid';
 import { HttpSessionGuard } from 'src/guard/http.session.guard';
+import { CreateUserDto, LoginResponseDto, LoginUserDto } from './user.dto';
+import { User } from './user.entity';
+import { UserService } from './user.service';
 
 @Controller('users')
 export class UserController {
-  constructor(
-    private readonly userService: UserService,
-    private readonly redisService: RedisService,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   @Post('register')
   async register(@Body() dto: CreateUserDto) {
@@ -28,36 +22,18 @@ export class UserController {
 
   @Post('login')
   async login(@Body() dto: LoginUserDto): Promise<LoginResponseDto> {
-    const user = await this.userService.validateUser(
-      dto.username,
-      dto.password,
-    );
-    if (!user) throw new UnauthorizedException('Invalid credentials');
-
-    const existingSessionId = await this.redisService.getSessionIdByUserId(
-      user.id,
-    );
-    if (existingSessionId) {
-      await this.redisService.deleteSession(existingSessionId);
-    }
-
-    const sessionId = uuidv4();
-    await this.redisService.setSession(sessionId, {
-      id: user.id,
-      username: user.username,
-    });
-
-    await this.redisService.setUserSessionMap(user.id, sessionId);
-
-    return {
-      sessionId,
-      username: user.username,
-    };
+    return await this.userService.login(dto.username, dto.password);
   }
 
   @Get('poketmons')
   @UseGuards(HttpSessionGuard)
-  async getMyPokemon(@Req() req: Request) {
-    return this.userService.getMyPokemons(req['user'].id);
+  async getMyPokemon(@Req() req: { user: User }) {
+    return this.userService.getMyPokemons(req.user.id);
+  }
+
+  @Post('wallet/link')
+  @UseGuards(HttpSessionGuard)
+  async linkWallet(@Req() req: { user: User }, @Body('privateKey') privateKey: string) {
+    return this.userService.linkWallet(req.user.id, privateKey);
   }
 }

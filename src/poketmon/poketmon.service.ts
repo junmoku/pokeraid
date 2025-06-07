@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Poketmon, UserPoketmon } from './poketmon.entity';
@@ -19,11 +19,25 @@ export class PokemonService {
     const pikachu = await this.pokemonRepo.findOne({
       where: { name: 'Pikachu' },
     });
-    if (!pikachu) throw new Error('Starter Pokemon not found');
+    if (!pikachu) throw new BadRequestException('Starter Pokemon not found');
 
     const userPokemon = this.userPokemonRepo.create({
       user_id: userId,
       pokemon_id: pikachu.id,
+    });
+
+    return this.userPokemonRepo.save(userPokemon);
+  }
+
+  async givePokemon(userId: number, pokemonId: number) {
+    const pokemon = await this.pokemonRepo.findOne({
+      where: { id: pokemonId },
+    });
+    if (!pokemon) throw new BadRequestException('Pokemon not found');
+
+    const userPokemon = this.userPokemonRepo.create({
+      user_id: userId,
+      pokemon_id: pokemon.id,
     });
 
     return this.userPokemonRepo.save(userPokemon);

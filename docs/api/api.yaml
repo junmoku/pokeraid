@@ -1,8 +1,9 @@
 openapi: 3.0.0
 info:
-  title: PokeRaid User API
+  title: PokeRaid API
   version: 1.0.0
-  description: API for user registration and login
+  description: API for user registration, login, blockchain and shop operations
+
 paths:
   /users/register:
     post:
@@ -43,7 +44,134 @@ paths:
                 $ref: '#/components/schemas/LoginResponseDto'
         '401':
           description: Invalid credentials
+  /users/poketmons:
+    get:
+      summary: Get user's Pokémon
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: List of user Pokémon
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserPokemon'
+  /users/wallet/link:
+    post:
+      summary: Link a blockchain wallet
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                privateKey:
+                  type: string
+      responses:
+        '200':
+          description: Wallet linked
+  /shop/items:
+    get:
+      summary: Get available shop Pokémon items
+      responses:
+        '200':
+          description: List of Pokémon items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ShopItem'
+  /shop/purchase:
+    post:
+      summary: Purchase a Pokémon item
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                itemId:
+                  type: number
+      responses:
+        '200':
+          description: Purchase success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  itemId:
+                    type: number
+                  txHash:
+                    type: string
+  /blockchain/balance:
+    get:
+      summary: Get token balance
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: User's token balance
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  address:
+                    type: string
+                  balance:
+                    type: string
+  /blockchain/deduct:
+    post:
+      summary: Deduct tokens from user
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: number
+      responses:
+        '200':
+          description: Token deduction successful
+  /blockchain/grant:
+    post:
+      summary: Grant tokens to user
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: number
+      responses:
+        '200':
+          description: Token grant successful
+
 components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+
   schemas:
     CreateUserDto:
       type: object
@@ -56,8 +184,6 @@ components:
           example: user123
         password:
           type: string
-          format: password
-          minLength: 4
           example: pass1234
     LoginUserDto:
       type: object
@@ -67,16 +193,36 @@ components:
       properties:
         username:
           type: string
-          example: user123
         password:
           type: string
-          example: pass1234
     LoginResponseDto:
       type: object
       properties:
         sessionId:
           type: string
-          example: abcdefgh-1234-5678-ijkl-9876543210ab
         username:
           type: string
-          example: user123
+    ShopItem:
+      type: object
+      properties:
+        shop_id:
+          type: number
+        price:
+          type: number
+        stock:
+          type: number
+        pokemon:
+          type: object
+    UserPokemon:
+      type: object
+      properties:
+        id:
+          type: number
+        pokemon:
+          type: object
+        skills:
+          type: array
+          items:
+            type: object
+        obtainedAt:
+          type: string

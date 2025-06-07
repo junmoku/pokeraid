@@ -1,10 +1,13 @@
-import { Injectable, UseGuards } from '@nestjs/common';
+import { Injectable, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './user.entity';
 import { RedisService } from 'src/reedis/redis.service';
 import { PokemonService } from 'src/poketmon/poketmon.service';
+import { encrypt } from 'src/utils/util.crypto';
+import { ethers } from 'ethers';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UserService {
@@ -23,6 +26,35 @@ export class UserService {
     return;
   }
 
+  async login(
+    username: string,
+    password: string,
+  ): Promise<{ sessionId: string; username: string }> {
+    const user = await this.validateUser(username, password);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const existingSessionId = await this.redisService.getSessionIdByUserId(
+      user.id,
+    );
+    if (existingSessionId) {
+      await this.redisService.deleteSession(existingSessionId);
+    }
+
+    const sessionId = uuidv4();
+    await this.redisService.setSession(sessionId, {
+      id: user.id,
+      username: user.username,
+    });
+    await this.redisService.setUserSessionMap(user.id, sessionId);
+
+    return {
+      sessionId,
+      username: user.username,
+    };
+  }
+
   async validateUser(username: string, password: string): Promise<User | null> {
     const user = await this.userRepo.findOne({ where: { username } });
     if (!user) return null;
@@ -32,5 +64,21 @@ export class UserService {
 
   async getMyPokemons(userId: number) {
     return this.pokemonService.getUserPokemons(userId);
+  }
+
+  async linkWallet(userId: number, privateKey: string) {
+    const wallet = new ethers.Wallet(privateKey);
+    const encryptedPrivateKey = encrypt(privateKey);
+
+    await this.userRepo.update(userId, {
+      address: wallet.address,
+      privateKey: encryptedPrivateKey,
+    });
+
+    return;
+  }
+
+  async findById(userId: number): Promise<User> {
+    return this.userRepo.findOneOrFail({ where: { id: userId } });
   }
 }
