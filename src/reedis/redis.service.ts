@@ -31,4 +31,24 @@ export class RedisService {
   async setUserSessionMap(userId: number, sessionId: string, ttl = 3600) {
     await this.client.set(`user:${userId}`, sessionId, 'EX', ttl);
   }
+
+  async createRoom(roomId: string, userId: number) {
+    await this.client.sadd(`room:${roomId}:members`, userId);
+  }
+
+  async joinRoom(roomId: string, userId: number) {
+    await this.client.sadd(`room:${roomId}:members`, userId);
+  }
+
+  async leaveRoom(roomId: string, userId: number) {
+    await this.client.srem(`room:${roomId}:members`, userId);
+  }
+
+  async getRoom(roomId: string) {
+    return await this.client.smembers(`room:${roomId}:members`);
+  }
+
+  async getRooms() {
+    return await this.client.keys('room:*:members');
+  }
 }
