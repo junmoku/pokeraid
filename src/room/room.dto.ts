@@ -11,3 +11,13 @@ export class LeaveRoomDto {
   @IsNotEmpty()
   roomId: string;
 }
+
+export class TestRoomDto {
+  @IsString()
+  @IsNotEmpty()
+  roomId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  message: string;
+}

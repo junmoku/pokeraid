@@ -36,16 +36,34 @@ export class RedisService {
     await this.client.sadd(`room:${roomId}:members`, userId);
   }
 
+  async getMemberCount(roomId: string) {
+    return await this.client.scard(`room:${roomId}:members`);
+  }
+
+  async isMember(roomId: string, userId: string) {
+    return await this.client.sismember(`room:${roomId}:members`, userId);
+  }
+
   async joinRoom(roomId: string, userId: number) {
     await this.client.sadd(`room:${roomId}:members`, userId);
+    await this.client.set(`user:${userId}:room`, roomId);
   }
 
   async leaveRoom(roomId: string, userId: number) {
     await this.client.srem(`room:${roomId}:members`, userId);
+    await this.client.del(`user:${userId}:room`);
+  }
+
+  async removeRoom(roomId: string) {
+    await this.client.del(`room:${roomId}:members`);
   }
 
   async getRoom(roomId: string) {
     return await this.client.smembers(`room:${roomId}:members`);
+  }
+
+  async getUserRoom(userId: number) {
+    return await this.client.get(`user:${userId}:room`);
   }
 
   async getRooms() {

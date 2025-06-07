@@ -7,7 +7,13 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+    ConflictException,
+  ForbiddenException,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { WsSessionGuard } from 'src/guard/ws.session.guard';
 import { RoomService } from './room.servie';
 import {
@@ -15,12 +21,14 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets/interfaces/hooks';
 import { RedisService } from 'src/reedis/redis.service';
-import { JoinRoomDto, LeaveRoomDto } from './room.dto';
+import { JoinRoomDto, LeaveRoomDto, TestRoomDto } from './room.dto';
 
 @WebSocketGateway({ namespace: '/rooms', cors: true })
 export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
+
+  private readonly maxMemberCount = 4;
 
   constructor(
     private readonly roomService: RoomService,
@@ -54,7 +62,16 @@ export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() body: JoinRoomDto,
   ) {
     const user = client['user'];
-    const room = await this.roomService.joinRoom(body.roomId, user);
+    const memberCount = await this.redisService.getMemberCount(body.roomId);
+    if (memberCount >= this.maxMemberCount) {
+      throw new ForbiddenException('max member count');
+    }
+    const userRoom = await this.redisService.getUserRoom(user.id);
+    if (userRoom) {
+      throw new ConflictException('already member');
+    }
+    await this.redisService.joinRoom(body.roomId, user.id);
+    const room = await this.roomService.getRoom(body.roomId);
     client.join(body.roomId);
     this.server.to(body.roomId).emit('roomUpdate', room);
   }
@@ -66,31 +83,42 @@ export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() body: LeaveRoomDto,
   ) {
-
-    console.log('aaaaa : ' + body.roomId)
-
     const user = client['user'];
-
-        console.log('aaaaa : ' + user.id)
-
-
-    const room = await this.roomService.leaveRoom(body.roomId, user);
+    const isMember = await this.redisService.isMember(
+      body.roomId,
+      String(user.id),
+    );
+    if (!isMember) {
+      throw new ForbiddenException('not member');
+    }
+    await this.redisService.leaveRoom(body.roomId, user.id);
+    const room = await this.roomService.getRoom(body.roomId);
+    const memberCount = await this.redisService.getMemberCount(body.roomId);
+    if (memberCount <= 0) {
+      await this.redisService.removeRoom(body.roomId);
+    }
     client.leave(body.roomId);
     this.server.to(body.roomId).emit('roomUpdate', room);
-
-    return { success: true };
+    return room;
   }
 
   @UseGuards(WsSessionGuard)
   @SubscribeMessage('test')
   async handleMessage(
     @ConnectedSocket() client: Socket,
-    @MessageBody() payload: { roomId: string; message: string },
+    @MessageBody() body: TestRoomDto,
   ) {
     const user = client['user'];
-    this.server.to(payload.roomId).emit('test', {
+    const isMember = await this.redisService.isMember(
+      body.roomId,
+      String(user.id),
+    );
+    if (!isMember) {
+      throw new ForbiddenException('not member');
+    }
+    this.server.to(body.roomId).emit('test', {
       from: user.username,
-      message: payload.message,
+      message: body.message,
     });
   }
 }

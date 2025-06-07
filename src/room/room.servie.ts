@@ -1,5 +1,9 @@
 // room.service.ts
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { RedisService } from 'src/reedis/redis.service';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
@@ -13,6 +17,10 @@ export class RoomService {
   ) {}
 
   async createRoom(user: User) {
+    const userRoom = await this.redisService.getUserRoom(user.id);
+    if (userRoom) {
+      throw new ConflictException('already member');
+    }
     const roomId = uuidv4();
     await this.redisService.createRoom(roomId, user.id);
     return this.getRoom(roomId);
@@ -35,12 +43,11 @@ export class RoomService {
     return Promise.all(roomIds.map((roomId) => this.getRoom(roomId)));
   }
 
-  async joinRoom(roomId: string, user: User) {
-    await this.redisService.joinRoom(roomId, user.id);
-    return this.getRoom(roomId);
-  }
-
   async leaveRoom(roomId: string, user: User) {
+    const isMember = await this.redisService.isMember(roomId, String(user.id));
+    if (!isMember) {
+      throw new ForbiddenException('not member');
+    }
     await this.redisService.leaveRoom(roomId, user.id);
     return this.getRoom(roomId);
   }
