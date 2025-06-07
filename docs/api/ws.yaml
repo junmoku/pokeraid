@@ -1,0 +1,89 @@
+asyncapi: 2.6.0
+info:
+  title: PokeRaid WebSocket API
+  version: 1.0.0
+  description: PokeRaid 프로젝트의 WebSocket API 문서
+servers:
+  pokeraid-ws:
+    url: ws://localhost:3000/rooms
+    protocol: socket.io
+channels:
+  joinRoom:
+    subscribe:
+      summary: 방 참여 요청
+      message:
+        name: JoinRoom
+        payload:
+          type: object
+          properties:
+            roomId:
+              type: string
+    publish:
+      summary: 방 상태 업데이트
+      message:
+        name: RoomUpdate
+        payload:
+          type: object
+          properties:
+            roomId:
+              type: string
+            members:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  username:
+                    type: string
+  leaveRoom:
+    subscribe:
+      summary: 방 나가기 요청
+      message:
+        name: LeaveRoom
+        payload:
+          type: object
+          properties:
+            roomId:
+              type: string
+    publish:
+      summary: 방 상태 업데이트
+      message:
+        name: RoomUpdate
+        payload:
+          type: object
+          properties:
+            roomId:
+              type: string
+            members:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  username:
+                    type: string
+  message:
+    subscribe:
+      summary: 메시지 전송
+      message:
+        name: Message
+        payload:
+          type: object
+          properties:
+            roomId:
+              type: string
+            message:
+              type: string
+    publish:
+      summary: 메시지 수신
+      message:
+        name: MessageResponse
+        payload:
+          type: object
+          properties:
+            from:
+              type: string
+            message:
+              type: string

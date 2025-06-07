@@ -2,7 +2,10 @@ openapi: 3.0.0
 info:
   title: PokeRaid API
   version: 1.0.0
-  description: API for user registration, login, blockchain and shop operations
+  description: API for user registration, login, blockchain, shop operations and real-time room interactions via WebSocket
+
+servers:
+  - url: http://localhost:3000
 
 paths:
   /users/register:
@@ -26,6 +29,7 @@ paths:
                     type: number
                   username:
                     type: string
+
   /users/login:
     post:
       summary: Log in a user and get session ID
@@ -44,6 +48,7 @@ paths:
                 $ref: '#/components/schemas/LoginResponseDto'
         '401':
           description: Invalid credentials
+
   /users/poketmons:
     get:
       summary: Get user's Pokémon
@@ -58,6 +63,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/UserPokemon'
+
   /users/wallet/link:
     post:
       summary: Link a blockchain wallet
@@ -75,6 +81,7 @@ paths:
       responses:
         '200':
           description: Wallet linked
+
   /shop/items:
     get:
       summary: Get available shop Pokémon items
@@ -87,6 +94,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ShopItem'
+
   /shop/purchase:
     post:
       summary: Purchase a Pokémon item
@@ -113,6 +121,7 @@ paths:
                     type: number
                   txHash:
                     type: string
+
   /blockchain/balance:
     get:
       summary: Get token balance
@@ -130,6 +139,7 @@ paths:
                     type: string
                   balance:
                     type: string
+
   /blockchain/deduct:
     post:
       summary: Deduct tokens from user
@@ -147,6 +157,7 @@ paths:
       responses:
         '200':
           description: Token deduction successful
+
   /blockchain/grant:
     post:
       summary: Grant tokens to user
@@ -165,6 +176,58 @@ paths:
         '200':
           description: Token grant successful
 
+  /rooms:
+    post:
+      summary: Create a new room
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                maxMembers:
+                  type: integer
+      responses:
+        '201':
+          description: Room created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  roomId:
+                    type: string
+                  name:
+                    type: string
+                  maxMembers:
+                    type: integer
+    get:
+      summary: Get available rooms
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: List of rooms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    roomId:
+                      type: string
+                    name:
+                      type: string
+                    currentMembers:
+                      type: integer
+                    maxMembers:
+                      type: integer
 components:
   securitySchemes:
     sessionAuth:
@@ -185,6 +248,7 @@ components:
         password:
           type: string
           example: pass1234
+
     LoginUserDto:
       type: object
       required:
@@ -195,6 +259,7 @@ components:
           type: string
         password:
           type: string
+
     LoginResponseDto:
       type: object
       properties:
@@ -202,6 +267,7 @@ components:
           type: string
         username:
           type: string
+
     ShopItem:
       type: object
       properties:
@@ -213,6 +279,7 @@ components:
           type: number
         pokemon:
           type: object
+
     UserPokemon:
       type: object
       properties:
