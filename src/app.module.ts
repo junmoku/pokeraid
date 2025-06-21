@@ -14,7 +14,6 @@ import { RedisModule } from './reedis/redis.module';
       password: 'secret123',
       database: 'pokeraid',
       entities: [User],
-      synchronize: true,
     }),
     RedisModule.forRootAsync(),
     UserModule,
