@@ -17,7 +17,6 @@ import { RoomModule } from './room/room.module';
       password: 'secret123',
       database: 'pokeraid',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
     }),
     RedisModule.forRootAsync(),
     UserModule,
