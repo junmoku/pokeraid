@@ -16,7 +16,6 @@ import { BlockchainModule } from './blockchain/blockchain.module';
       password: 'secret123',
       database: 'pokeraid',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
     }),
     RedisModule.forRootAsync(),
     UserModule,
