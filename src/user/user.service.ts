@@ -23,13 +23,13 @@ export class UserService {
     const user = this.userRepo.create({ username, password: hashed });
     const savedUser = await this.userRepo.save(user);
     await this.pokemonService.giveStarterPokemon(savedUser.id);
-    return;
+    return {};
   }
 
   async login(
     username: string,
     password: string,
-  ): Promise<{ sessionId: string; username: string }> {
+  ): Promise<{ sessionId: string; id: number }> {
     const user = await this.validateUser(username, password);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -51,7 +51,7 @@ export class UserService {
 
     return {
       sessionId,
-      username: user.username,
+      id: user.id,
     };
   }
 
