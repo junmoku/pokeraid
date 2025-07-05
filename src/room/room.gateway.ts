@@ -21,7 +21,7 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets/interfaces/hooks';
 import { RedisService } from 'src/reedis/redis.service';
-import { JoinRoomDto, LeaveRoomDto, TestRoomDto } from './room.dto';
+import { CreateRoomDto, JoinRoomDto, LeaveRoomDto, TestRoomDto } from './room.dto';
 
 @WebSocketGateway({ namespace: '/rooms', cors: true })
 export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -52,6 +52,27 @@ export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleDisconnect(client: Socket) {
     console.log(`Client disconnected: ${client.id}`);
+  }
+
+
+  @UseGuards(WsSessionGuard)
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  @SubscribeMessage('createRoom')
+  async handleCreateRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: CreateRoomDto,
+  ) {
+    console.log(client['user']);
+    const user = client['user'];
+    console.log("createRoomcreateRoom");
+
+    const userRoom = await this.redisService.getUserRoom(user.id);
+    if (userRoom) {
+      throw new ConflictException('already member');
+    }
+    const room = await this.roomService.createRoom(user);
+    client.join(room.roomId);
+    this.server.to(room.roomId).emit('roomUpdate', room);
   }
 
   @UseGuards(WsSessionGuard)
