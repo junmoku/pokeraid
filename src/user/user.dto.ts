@@ -24,5 +24,5 @@ export class LoginUserDto {
 
 export class LoginResponseDto {
   sessionId: string;
-  username: string;
+  id: number;
 }
