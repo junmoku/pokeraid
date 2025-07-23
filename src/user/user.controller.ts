@@ -17,12 +17,12 @@ export class UserController {
 
   @Post('register')
   async register(@Body() dto: CreateUserDto) {
-    return this.userService.register(dto.id, dto.password);
+    return await this.userService.register(dto.id, dto.password);
   }
 
   @Post('login')
   async login(@Body() dto: LoginUserDto): Promise<LoginResponseDto> {
-    return await this.userService.login(dto.username, dto.password);
+    return await this.userService.login(dto.id, dto.password);
   }
 
   @Get('poketmons')

@@ -9,6 +9,21 @@ export class createRoomDto {
   myPoketmonId: number;
 }
 
+export class CreateRoomDto {
+
+  @IsString()
+  @IsNotEmpty()
+  roomName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  roomLevel: string;
+
+  @IsString()
+  @IsNotEmpty()
+  usePoketmonId: string;
+}
+
 export class JoinRoomDto {
   @IsString()
   @IsNotEmpty()
