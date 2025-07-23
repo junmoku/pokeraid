@@ -1,17 +1,10 @@
-// room.controller.ts
-import { Controller, Post, Get, Body, UseGuards, Req } from '@nestjs/common';
-import { RoomService } from './room.servie';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { HttpSessionGuard } from 'src/guard/http.session.guard';
+import { RoomService } from './room.servie';
 
 @Controller('rooms')
 export class RoomController {
   constructor(private readonly roomService: RoomService) {}
-
-  @Post()
-  @UseGuards(HttpSessionGuard)
-  async createRoom(@Req() req: any) {
-    return await this.roomService.createRoom(req.user);
-  }
 
   @Get()
   @UseGuards(HttpSessionGuard)

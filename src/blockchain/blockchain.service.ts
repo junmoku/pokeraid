@@ -23,27 +23,37 @@ export class BlockchainService {
     return new ethers.Contract(CONTRACT_ADDRESS, ERC20ABI, signerOrProvider);
   }
 
-  async getBalance(user: User): Promise<string> {
+  async getBalance(user: User) {
+    if (!user.address) {
+      throw new Error('no addresss');
+    }
+
     const contract = this.getContract(this.provider);
     const balance = await contract.balanceOf(user.address);
-    return ethers.utils.formatUnits(balance, 18);
+    return {
+      balance: ethers.utils.formatUnits(balance, 18)
+    }
   }
 
-  async deductTokens(user: User, amount: string): Promise<string> {
-    const decrypted = decrypt(user.privateKey);
+  async deductTokens(user: User, amount: string) {
+    const decrypted = decrypt(user.private_key);
     const userWallet = new ethers.Wallet(decrypted, this.provider);
     const contract = this.getContract(userWallet);
     const value = ethers.utils.parseUnits(amount, 18);
     const tx = await contract.transfer(this.ownerWallet.address, value);
     await tx.wait();
-    return tx.hash;
+    return {
+      txHash: tx.hash
+    }
   }
 
-  async grantTokens(user: User, amount: string): Promise<string> {
+  async grantTokens(user: User, amount: string) {
     const contract = this.getContract(this.ownerWallet);
     const value = ethers.utils.parseUnits(amount, 18);
     const tx = await contract.transfer(user.address, value);
     await tx.wait();
-    return tx.hash;
+    return {
+      txHash: tx.hash
+    }
   }
 }

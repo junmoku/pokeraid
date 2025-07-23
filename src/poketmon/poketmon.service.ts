@@ -5,7 +5,7 @@ import { Poketmon, UserPoketmon } from './poketmon.entity';
 import { PoketmonSkill } from './poketmon.skill.entity';
 
 @Injectable()
-export class PokemonService {
+export class PoketmonService {
   constructor(
     @InjectRepository(Poketmon)
     private pokemonRepo: Repository<Poketmon>,
@@ -15,28 +15,28 @@ export class PokemonService {
     private userPokemonRepo: Repository<UserPoketmon>,
   ) {}
 
-  async giveStarterPokemon(userId: number) {
-    const pikachu = await this.pokemonRepo.findOne({
-      where: { name: 'Pikachu' },
+  async giveStarterPokemon(userSeq: number) {
+    const starter = await this.pokemonRepo.findOne({
+      where: { id: 1 },
     });
-    if (!pikachu) throw new BadRequestException('Starter Pokemon not found');
+    if (!starter) throw new BadRequestException('Starter Pokemon not found');
 
     const userPokemon = this.userPokemonRepo.create({
-      user_id: userId,
-      pokemon_id: pikachu.id,
+      user_seq: userSeq,
+      pokemon_id: starter.id,
     });
 
     return this.userPokemonRepo.save(userPokemon);
   }
 
-  async givePokemon(userId: number, pokemonId: number) {
+  async givePokemon(userSeq: number, pokemonId: number) {
     const pokemon = await this.pokemonRepo.findOne({
       where: { id: pokemonId },
     });
     if (!pokemon) throw new BadRequestException('Pokemon not found');
 
     const userPokemon = this.userPokemonRepo.create({
-      user_id: userId,
+      user_seq: userSeq,
       pokemon_id: pokemon.id,
     });
 
@@ -48,18 +48,18 @@ export class PokemonService {
     if (!pokemon) return null;
 
     const skills = await this.pokemonSkillRepo.find({
-      where: { pokemon_id: id },
+      where: { pokemon_id: pokemon.id },
     });
 
     return {
       ...pokemon,
-      skills,
+      skills: skills,
     };
   }
 
-  async getUserPokemons(userId: number) {
+  async getUserPokemons(userSeq: number) {
     const userPokemons = await this.userPokemonRepo.find({
-      where: { user_id: userId },
+      where: { user_seq: userSeq },
     });
 
     const results = await Promise.all(
@@ -72,10 +72,10 @@ export class PokemonService {
         });
 
         return {
-          id: up.id,
-          pokemon,
+          poketmonId: up.pokemon_id,
+          name: pokemon?.name,
+          hp: pokemon?.hp,
           skills,
-          obtainedAt: up.created_at,
         };
       }),
     );

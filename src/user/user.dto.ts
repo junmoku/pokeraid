@@ -3,7 +3,7 @@ import { IsNotEmpty, IsString, MinLength } from 'class-validator';
 export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
-  username: string;
+  id: string;
 
   @IsNotEmpty()
   @IsString()
@@ -24,5 +24,5 @@ export class LoginUserDto {
 
 export class LoginResponseDto {
   sessionId: string;
-  username: string;
+  id: string;
 }

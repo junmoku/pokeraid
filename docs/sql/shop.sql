@@ -2,7 +2,7 @@
 
 CREATE TABLE `shop` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `type` enum('POKEMON','ITEM') NOT NULL,
+  `type` enum('POKETMON','ITEM') NOT NULL,
   `target_id` int NOT NULL,
   `price` int NOT NULL,
   `stock` int DEFAULT '-1',
@@ -13,13 +13,13 @@ CREATE TABLE `shop` (
 
 
 INSERT INTO shop (type, target_id, price, stock) VALUES
-('POKEMON', 1, 12, 10),
-('POKEMON', 2, 18, 15),
-('POKEMON', 3, 15, 8),
-('POKEMON', 4, 17, 12),
-('POKEMON', 5, 20, 5),
-('POKEMON', 6, 11, 9),
-('POKEMON', 7, 16, 11),
-('POKEMON', 8, 19, 7),
-('POKEMON', 9, 14, 20),
-('POKEMON', 10, 13, 3);
+('POKETMON', 1, 12, 10),
+('POKETMON', 2, 18, 15),
+('POKETMON', 3, 15, 8),
+('POKETMON', 4, 17, 12),
+('POKETMON', 5, 20, 5),
+('POKETMON', 6, 11, 9),
+('POKETMON', 7, 16, 11),
+('POKETMON', 8, 19, 7),
+('POKETMON', 9, 14, 20),
+('POKETMON', 10, 13, 3);
