@@ -2,12 +2,33 @@ asyncapi: 2.6.0
 info:
   title: PokeRaid WebSocket API
   version: 1.0.0
-  description: PokeRaid 프로젝트의 WebSocket API 문서
+  description: PokeRaid 프로젝트의 WebSocket 이벤트 API 문서
 servers:
   pokeraid-ws:
     url: ws://localhost:3000/rooms
     protocol: socket.io
+
 channels:
+
+  createRoom:
+    subscribe:
+      summary: 방 생성 요청
+      message:
+        name: CreateRoom
+        payload:
+          type: object
+          properties:
+            boosId:
+              type: integer
+            myPoketmonId:
+              type: integer
+    publish:
+      summary: 생성된 방 정보 브로드캐스트
+      message:
+        name: RoomUpdate
+        payload:
+          $ref: '#/components/schemas/Room'
+
   joinRoom:
     subscribe:
       summary: 방 참여 요청
@@ -18,24 +39,15 @@ channels:
           properties:
             roomId:
               type: string
+            myPoketmonId:
+              type: integer
     publish:
       summary: 방 상태 업데이트
       message:
         name: RoomUpdate
         payload:
-          type: object
-          properties:
-            roomId:
-              type: string
-            members:
-              type: array
-              items:
-                type: object
-                properties:
-                  id:
-                    type: integer
-                  username:
-                    type: string
+          $ref: '#/components/schemas/Room'
+
   leaveRoom:
     subscribe:
       summary: 방 나가기 요청
@@ -51,39 +63,116 @@ channels:
       message:
         name: RoomUpdate
         payload:
-          type: object
-          properties:
-            roomId:
-              type: string
-            members:
-              type: array
-              items:
-                type: object
-                properties:
-                  id:
-                    type: integer
-                  username:
-                    type: string
-  message:
+          $ref: '#/components/schemas/Room'
+
+  startRaid:
     subscribe:
-      summary: 메시지 전송
+      summary: 레이드 시작 요청
       message:
-        name: Message
+        name: StartRaid
         payload:
           type: object
           properties:
             roomId:
-              type: string
-            message:
               type: string
     publish:
-      summary: 메시지 수신
+      summary: 전투 상태 전송
       message:
-        name: MessageResponse
+        name: ChangeTurn
+        payload:
+          $ref: '#/components/schemas/BattleState'
+
+  action:
+    subscribe:
+      summary: 유저 스킬 사용 요청
+      message:
+        name: Action
         payload:
           type: object
           properties:
-            from:
+            roomId:
               type: string
-            message:
-              type: string
+            skillSeq:
+              type: integer
+    publish:
+      summary: 턴 변경 이벤트
+      message:
+        name: ChangeTurn
+        payload:
+          $ref: '#/components/schemas/BattleState'
+
+components:
+  schemas:
+    Room:
+      type: object
+      properties:
+        roomId:
+          type: string
+        bossPokemonId:
+          type: integer
+        leaderId:
+          type: integer
+        members:
+          type: array
+          items:
+            type: object
+            properties:
+              userSeq:
+                type: integer
+              pokemonId:
+                type: integer
+              order:
+                type: integer
+
+    BattleState:
+      type: object
+      properties:
+        members:
+          type: array
+          items:
+            type: object
+            properties:
+              userSeq:
+                type: integer
+              order:
+                type: integer
+              connectionStatus:
+                type: string
+              poketmon:
+                type: object
+                properties:
+                  seq:
+                    type: integer
+                  hp:
+                    type: integer
+                  skills:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        seq:
+                          type: integer
+                        pp:
+                          type: integer
+        turn:
+          type: object
+          properties:
+            count:
+              type: integer
+            next:
+              type: integer
+        action:
+          type: object
+          nullable: true
+          properties:
+            actor:
+              type: integer
+            skill:
+              type: integer
+            target:
+              type: array
+              items:
+                type: integer
+        status:
+          type: string
+          enum: [fighting, win, defeat]
