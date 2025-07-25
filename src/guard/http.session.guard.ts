@@ -1,7 +1,12 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
 import { RedisService } from 'src/reedis/redis.service';
+import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
+
+export interface AuthenticatedRequest extends Request {
+  user: User;
+}
 
 @Injectable()
 export class HttpSessionGuard implements CanActivate {
@@ -23,7 +28,9 @@ export class HttpSessionGuard implements CanActivate {
       throw new UnauthorizedException('Invalid or expired session');
     }
 
-    const user = await this.userService.findById(session.id);
+    await this.redisService.expireExtend(sessionId);
+
+    const user = await this.userService.findByIdOrFail(session.user_seq);
     request['user'] = user;
     return true;
   }

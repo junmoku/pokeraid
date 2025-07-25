@@ -6,7 +6,7 @@ import {
   Req,
   UseGuards
 } from '@nestjs/common';
-import { HttpSessionGuard } from 'src/guard/http.session.guard';
+import { AuthenticatedRequest, HttpSessionGuard } from 'src/guard/http.session.guard';
 import { CreateUserDto, LoginResponseDto, LoginUserDto } from './user.dto';
 import { User } from './user.entity';
 import { UserService } from './user.service';
@@ -17,23 +17,23 @@ export class UserController {
 
   @Post('register')
   async register(@Body() dto: CreateUserDto) {
-    return await this.userService.register(dto.username, dto.password);
+    return await this.userService.register(dto.id, dto.password);
   }
 
   @Post('login')
   async login(@Body() dto: LoginUserDto): Promise<LoginResponseDto> {
-    return await this.userService.login(dto.username, dto.password);
+    return await this.userService.login(dto.id, dto.password);
   }
 
   @Get('poketmons')
   @UseGuards(HttpSessionGuard)
-  async getMyPokemon(@Req() req: { user: User }) {
-    return this.userService.getMyPokemons(req.user.id);
+  async getMyPokemon(@Req() req: AuthenticatedRequest) {
+    return this.userService.getMyPokemons(req.user.seq);
   }
 
   @Post('wallet/link')
   @UseGuards(HttpSessionGuard)
-  async linkWallet(@Req() req: { user: User }, @Body('privateKey') privateKey: string) {
-    return this.userService.linkWallet(req.user.id, privateKey);
+  async linkWallet(@Req() req: AuthenticatedRequest, @Body('privateKey') privateKey: string) {
+    return this.userService.linkWallet(req.user.seq, privateKey);
   }
 }

@@ -26,8 +26,6 @@ paths:
                 type: object
                 properties:
                   id:
-                    type: number
-                  username:
                     type: string
 
   /users/login:
@@ -177,35 +175,6 @@ paths:
           description: Token grant successful
 
   /rooms:
-    post:
-      summary: Create a new room
-      security:
-        - sessionAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                maxMembers:
-                  type: integer
-      responses:
-        '201':
-          description: Room created
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  roomId:
-                    type: string
-                  name:
-                    type: string
-                  maxMembers:
-                    type: integer
     get:
       summary: Get available rooms
       security:
@@ -239,10 +208,10 @@ components:
     CreateUserDto:
       type: object
       required:
-        - username
+        - id
         - password
       properties:
-        username:
+        id:
           type: string
           example: user123
         password:
@@ -252,10 +221,10 @@ components:
     LoginUserDto:
       type: object
       required:
-        - username
+        - id
         - password
       properties:
-        username:
+        id:
           type: string
         password:
           type: string
@@ -265,7 +234,7 @@ components:
       properties:
         sessionId:
           type: string
-        username:
+        id:
           type: string
 
     ShopItem:

@@ -19,9 +19,9 @@ import { RoomModule } from './room/room.module';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
     }),
     RedisModule.forRootAsync(),
+    BlockchainModule,
     UserModule,
     ShopModule,
-    BlockchainModule,
     RoomModule,
   ],
 })

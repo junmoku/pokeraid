@@ -5,8 +5,8 @@ export class Shop {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'enum', enum: ['POKEMON', 'ITEM'] })
-  type: 'POKEMON' | 'ITEM';
+  @Column({ type: 'enum', enum: ['POKETMON', 'ITEM'] })
+  type: 'POKETMON' | 'ITEM';
 
   @Column()
   target_id: number;

@@ -15,10 +15,10 @@ export class Poketmon {
 @Entity()
 export class UserPoketmon {
   @PrimaryGeneratedColumn()
-  id: number;
+  seq: number;
 
   @Column()
-  user_id: number;
+  user_seq: number;
 
   @Column()
   pokemon_id: number;
