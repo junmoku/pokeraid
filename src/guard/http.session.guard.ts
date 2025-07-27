@@ -30,7 +30,7 @@ export class HttpSessionGuard implements CanActivate {
 
     await this.redisService.expireExtend(sessionId);
 
-    const user = await this.userService.findByIdOrFail(session.user_seq);
+    const user = await this.userService.findByIdOrFail(session.seq);
     request['user'] = user;
     return true;
   }

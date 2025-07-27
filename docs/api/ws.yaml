@@ -123,6 +123,8 @@ components:
                 type: integer
               order:
                 type: integer
+        eventType:
+          type: string
 
     BattleState:
       type: object
