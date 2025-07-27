@@ -85,7 +85,7 @@ export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // const roomId = '2b9e9d3d-ff84-429a-901c-faeeeedd7888';
     await this.redisService.createRoom(roomId, user.seq, boss.id);
     await this.redisService.joinRoom(roomId, user.seq, body.myPoketmonId);
-    const updateRoom = await this.roomService.getRoom(roomId);
+    const updateRoom = await this.roomService.getRoom(roomId, 'createRoom');
 
     client.join(updateRoom.roomId);
     this.server.to(updateRoom.roomId).emit('roomUpdate', updateRoom);
@@ -101,7 +101,7 @@ export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const user = client['user'];
     const memberCount = await this.redisService.getMemberCount(body.roomId);
 
-    const room = await this.roomService.getRoom(body.roomId);
+    const room = await this.roomService.getRoom(body.roomId, 'joinRoom');
     if (!room) {
       throw new ForbiddenException('room not found');
     }
@@ -114,7 +114,7 @@ export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     await this.redisService.joinRoom(body.roomId, user.seq, body.myPoketmonId);
     client.join(body.roomId);
-    const roomUpdate = await this.roomService.getRoom(body.roomId);
+    const roomUpdate = await this.roomService.getRoom(body.roomId, 'joinRoom');
     this.server.to(body.roomId).emit('roomUpdate', roomUpdate);
   }
 
@@ -137,13 +137,13 @@ export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
       throw new Error('not member');
     }
     await this.redisService.leaveRoom(body.roomId, user.seq);
-    const room = await this.roomService.getRoom(body.roomId);
+    const room = await this.roomService.getRoom(body.roomId, 'leaveRoom');
     const memberCount = await this.redisService.getMemberCount(body.roomId);
     if (memberCount <= 0) {
       await this.redisService.removeRoom(body.roomId);
     }
     client.leave(body.roomId);
-    const roomUpdate = await this.roomService.getRoom(body.roomId);
+    const roomUpdate = await this.roomService.getRoom(body.roomId, 'leaveRoom');
     this.server.to(body.roomId).emit('roomUpdate', roomUpdate);
     return room;
   }
@@ -155,7 +155,7 @@ export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() body: { roomId: string },
   ) {
     const user = client['user'];
-    const room = await this.roomService.getRoom(body.roomId);
+    const room = await this.roomService.getRoom(body.roomId, 'startRaid');
 
     if (room.leaderId !== user.seq) {
       throw new ForbiddenException('Only the room leader can start the raid');
