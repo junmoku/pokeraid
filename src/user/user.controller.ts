@@ -25,7 +25,7 @@ export class UserController {
     return await this.userService.login(dto.id, dto.password);
   }
 
-  @Get('poketmons')
+  @Get('pokemons')
   @UseGuards(HttpSessionGuard)
   async getMyPokemon(@Req() req: AuthenticatedRequest) {
     return this.userService.getMyPokemons(req.user.seq);
