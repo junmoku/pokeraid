@@ -23,7 +23,7 @@ import { WsSessionGuard } from 'src/guard/ws.session.guard';
 import { PoketmonService } from 'src/poketmon/poketmon.service';
 import { RedisService } from 'src/reedis/redis.service';
 import { UserService } from 'src/user/user.service';
-import { createRoomDto, JoinRoomDto, LeaveRoomDto } from './room.dto';
+import { CreateRoomDto, JoinRoomDto, LeaveRoomDto } from './room.dto';
 import { RoomService } from './room.servie';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -66,7 +66,7 @@ export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('createRoom')
   async handleCreateRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() body: createRoomDto,
+    @MessageBody() body: CreateRoomDto,
   ) {
     const user = client['user'];
     const userRoom = await this.redisService.getUserRoom(user.seq);

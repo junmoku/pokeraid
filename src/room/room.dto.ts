@@ -1,27 +1,12 @@
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { IsNull } from 'typeorm';
 
-export class createRoomDto {
+export class CreateRoomDto {
   @IsNumber()
   boosId: number;
 
   @IsNumber()
   myPoketmonId: number;
-}
-
-export class CreateRoomDto {
-
-  @IsString()
-  @IsNotEmpty()
-  roomName: string;
-
-  @IsString()
-  @IsNotEmpty()
-  roomLevel: string;
-
-  @IsString()
-  @IsNotEmpty()
-  usePoketmonId: string;
 }
 
 export class JoinRoomDto {
